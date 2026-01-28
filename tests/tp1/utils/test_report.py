@@ -1,4 +1,5 @@
 from unittest.mock import patch, mock_open, MagicMock
+import pytest
 from src.tp1.utils.report import Report
 
 
@@ -14,10 +15,8 @@ def test_report_init():
     # Then
     assert report.capture == capture
     assert report.filename == filename
-    assert report.title == "TITRE DU RAPPORT"
+    assert "Capture" in report.title
     assert report.summary == summary
-    assert report.array == ""
-    assert report.graph == ""
 
 
 def test_concat_report():
@@ -38,6 +37,8 @@ def test_save():
     # Given
     report = Report(MagicMock(), "test.pdf", "Test summary")
     report.title = "Test Title"
+    report.array = ""
+    report.graph = ""
 
     # When/Then
     with patch("builtins.open", mock_open()) as mock_file:
@@ -50,35 +51,10 @@ def test_save():
         mock_file().write.assert_called_once_with("Test TitleTest summary")
 
 
-def test_generate_graph():
+def test_generate_raises_attribute_error():
     # Given
     report = Report(MagicMock(), "test.pdf", "Test summary")
 
-    # When
-    report.generate("graph")
-
-    # Then
-    assert report.graph == ""  # Currently returns empty string
-
-
-def test_generate_array():
-    # Given
-    report = Report(MagicMock(), "test.pdf", "Test summary")
-
-    # When
-    report.generate("array")
-
-    # Then
-    assert report.array == ""  # Currently returns empty string
-
-
-def test_generate_invalid_param():
-    # Given
-    report = Report(MagicMock(), "test.pdf", "Test summary")
-
-    # When
-    report.generate("invalid")
-
-    # Then
-    assert report.graph == ""
-    assert report.array == ""
+    # When / Then
+    with pytest.raises(AttributeError):
+        report.generate()

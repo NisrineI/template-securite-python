@@ -1,53 +1,66 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from src.tp1.utils.capture import Capture
+from scapy.layers.inet import IP, TCP, UDP, ICMP
+from scapy.layers.l2 import Ether, ARP
 
 
 def test_capture_init():
     # When
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
 
     # Then
-    assert capture.interface == ""
+    assert capture.interface == "eth0"
     assert capture.summary == ""
+    assert capture.packet_count == 0
+    assert capture.protocol_stats == {}
 
 
 def test_capture_trafic():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
 
     # When
-    capture.capture_traffic()
+    with patch("src.tp1.utils.capture.sniff"):
+        capture.capture_traffic(packet_count=10)
 
     # Then
     # This is a minimal test since the method doesn't do much yet
-    assert capture.interface == ""
+    assert capture.interface == "eth0"
 
 
 def test_sort_network_protocols():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
+    capture.protocol_stats = {"TCP": 50, "UDP": 30, "ARP": 20}
 
     # When
     result = capture.sort_network_protocols()
 
     # Then
-    assert result is None  # Method currently returns None
+    assert result == [("TCP", 50), ("UDP", 30), ("ARP", 20)]
 
 
 def test_get_all_protocols():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
+    capture.protocol_stats = {"TCP": 50, "UDP": 30}
 
     # When
     result = capture.get_all_protocols()
 
     # Then
-    assert result is None  # Method currently returns None
+    assert result == {"TCP": 50, "UDP": 30}
+    #assert result is None  # Method currently returns None
 
 
 def test_analyse():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
 
     # When
     with (
@@ -67,7 +80,8 @@ def test_analyse():
 
 def test_get_summary():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
     capture.summary = "Test summary"
 
     # When
@@ -79,10 +93,16 @@ def test_get_summary():
 
 def test_gen_summary():
     # Given
-    capture = Capture()
+    with patch("src.tp1.utils.capture.choose_interface", return_value="eth0"):
+        capture = Capture()
+    capture.interface = "eth0"
+    capture.packet_count = 100
+    capture.packets = [MagicMock()]
+    capture.protocol_stats = {"TCP": 50, "UDP": 50}
 
     # When
     result = capture.gen_summary()
 
     # Then
-    assert result == ""  # Method currently returns empty string
+    assert "Interface: eth0" in result
+    #assert result == ""  # Method currently returns empty string
