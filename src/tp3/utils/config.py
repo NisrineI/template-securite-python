@@ -1,3 +1,3 @@
-from src.config import logging
+import logging
 
 logger = logging.getLogger("TP3")
