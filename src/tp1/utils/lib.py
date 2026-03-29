@@ -1,24 +1,18 @@
+from scapy.arch import get_if_list, get_working_if
+
+
 def hello_world() -> str:
-    """
-    Hello world function
-    """
     return "hello world"
 
 
 def choose_interface() -> str:
-    """
-    Return network interface and input user choice
-    """
-    from scapy.arch import get_if_list
-    from scapy.arch import get_working_if
-
     try:
         interfaces = get_if_list()
         if not interfaces:
             raise Exception("Aucune interface reseau trouvee")
     except Exception as e:
         print(f"Error: {e}")
-        return None
+        return ""
 
     print("Available network interfaces:")
     for i, interface in enumerate(interfaces, 1):
@@ -29,16 +23,15 @@ def choose_interface() -> str:
             choice = input("\nSelectionnez une interface (numero): ").strip()
             if choice == "":
                 selected = interfaces[0]
-                print(f"Interface selectionnee: {selected}")
-                return selected
-            index = int(choice) - 1
-
-            if 0 <= index < len(interfaces):
-                selected = interfaces[index]
-                print(f"Interface selectionnee: {selected}")
-                return selected
             else:
-                print(f"Veuillez entrer un numero entre 1 et {len(interfaces)}")
+                index = int(choice) - 1
+                if 0 <= index < len(interfaces):
+                    selected = interfaces[index]
+                else:
+                    print(f"Veuillez entrer un numero entre 1 et {len(interfaces)}")
+                    continue
+            print(f"Interface selectionnee: {selected}")
+            return selected
         except EOFError:
             selected = interfaces[0]
             print(f"Interface selectionnee: {selected}")
